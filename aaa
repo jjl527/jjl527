@@ -1,0 +1,122 @@
+from linecache import clearcache
+from operator import lshift
+
+from google.api_core.client_logging import configure_defaults
+from pandas.io.sas.sas_constants import dataset_length
+from python解难.json1 import pythonOjb
+from selenium.webdriver.common.devtools.v132.target import activate_target
+
+sudo raspi-configure_defaults()
+# interface options   开启ssh
+
+hostname -I
+
+ssh pi@(ip地址)
+clear
+ls
+cd venv/
+source bin/activate
+
+pip list#当前安装的软件包
+
+clear
+#安装opencv
+pip install opencv-contrib-python==4.5.4.60
+
+python
+import cv2
+priint(cvs._file_)
+
+sudo apt -y install libatles-base-dev
+
+#安装python库
+pip list
+#检查摄像头
+ls /dev/video*
+lsusb -t
+
+
+
+
+
+#main
+vim test_camera.py
+import cv2
+import numpy
+cap = cv2.VideoCapture(0)
+face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarscade_frontalface_alt2.xml')
+
+count = 0
+
+while True:
+    ret,frame = cap.read()
+    if ret:
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        faces = face_cascade.detectMultiScale(gray,scaleFactor=1.5,minNeighbors = 5)
+        for (x,y,w,h) in faces:
+            print(x,y,w,h)
+            cv2.rectangle(frame,(x,y),(x+w,y+h),(0,255,0),2)
+            count += 1
+            cv2.imwrite('dataset/' + str(count) + '.jpg',gray[y:y+h,x:x+w])
+
+        cv2.imshow("frame",frame)
+        cv2.imshow("gray", gray)
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+    elif count == 50:
+        break
+cap.release()
+cv2.destroyAllWindows()
+
+
+
+
+
+
+
+
+DISPLAY=:1.0 python test_camera.py
+
+
+cd lib/python3.7/site-packages/cv2/
+ls
+tree data/
+
+python
+import cv2
+cv2.data
+cv2.data.haarcascades
+
+#采集数据
+mkdir dataset
+ls
+ls dataset/
+
+#对比
+mkdir yoyojacky/
+ls
+#再放一些图片到目录里面
+
+
+
+
+vim face_train.py
+
+import os
+import cv2
+import numpy as np
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+image_dir = os.path.join(BASE_DIR,'dataset')
+
+for root,dirs,files in os.walk(image_dir):
+    for file in files:
+        path = os.path.join(root,file)
+        print(path)#绝对路径
+        cv2.imread(path)
+        image = cv2.imread(path)
+        gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
+        image_array = np.array(gray,'uint8')
+        print(image_array)
+
+
