@@ -1,0 +1,11 @@
+# 备份原源
+sudo cp /etc/apt/sources.list /etc/apt/sources.list.bak
+
+# 替换为清华源（Bookworm 版本）
+echo "deb https://mirrors.tuna.tsinghua.edu.cn/debian/ bookworm main contrib non-free" | sudo tee /etc/apt/sources.list
+echo "deb https://mirrors.tuna.tsinghua.edu.cn/debian/ bookworm-updates main contrib non-free" | sudo tee -a /etc/apt/sources.list
+echo "deb https://mirrors.tuna.tsinghua.edu.cn/debian/ bookworm-backports main contrib non-free" | sudo tee -a /etc/apt/sources.list
+echo "deb https://mirrors.tuna.tsinghua.edu.cn/debian-security bookworm-security main contrib non-free" | sudo tee -a /etc/apt/sources.list
+
+# 更新源
+sudo apt update
