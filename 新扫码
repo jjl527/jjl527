@@ -1,0 +1,57 @@
+import cv2
+from pyzbar import pyzbar
+
+def main():
+    # 初始化USB摄像头
+    camera = cv2.VideoCapture('/dev/video0', cv2.CAP_V4L2)
+    camera.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
+    camera.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+    camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+    
+    # 创建大窗口
+    cv2.namedWindow("QR Code Detection", cv2.WINDOW_NORMAL)
+    cv2.resizeWindow("QR Code Detection", 1280, 720)
+    
+    print("二维码识别程序已启动...")
+    print("按'q'键退出程序")
+    
+    last_barcode = None  # 用于存储上一次识别的二维码内容
+    
+    while True:
+        ret, frame = camera.read()
+        if not ret:
+            print("无法获取视频帧")
+            break
+        
+        # 检测二维码
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        barcodes = pyzbar.decode(gray)
+        
+        for barcode in barcodes:
+            (x, y, w, h) = barcode.rect
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 4)
+            
+            barcode_data = barcode.data.decode("utf-8")
+            barcode_type = barcode.type
+            
+            text = f"{barcode_type}: {barcode_data}"
+            
+            # 只有当识别到新的二维码时才输出
+            if barcode_data != last_barcode:
+                print(f"检测到二维码: {text}")
+                last_barcode = barcode_data  # 更新最后识别的二维码
+            
+            # 在画面上始终显示识别结果
+            cv2.putText(frame, text, (x, y - 20), 
+                        cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 255), 2)
+        
+        cv2.imshow("QR Code Detection", frame)
+        
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+    
+    camera.release()
+    cv2.destroyAllWindows()
+
+if __name__ == "__main__":
+    main()
