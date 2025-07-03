@@ -1,0 +1,74 @@
+import os
+import cv2
+import numpy as np
+import pickle
+current_id = 0
+label_ids = {}
+x_train = []
+y_labels = []
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+image_dir = os.path.join(BASE_DIR,'dataset')
+
+recognizer = cv2.face.LBPHFaceRecognizer_create()
+classifier = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_alt2.xml")
+
+
+for root,dirs,files in os.walk(image_dir):
+    for file in files:
+        path = os.path.join(root,file)
+        image = cv2.imread(path)
+        gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
+        image_array = np.array(gray,'uint8')
+        label = os.path.basename(root)
+        if not label in label_ids:
+            label_ids[lable] = current_id
+            current_id += 1
+
+        id_ = label_ids[label]
+        faces = classifier.detectMultiScale(image_array, scaleFactor=1.5, minNeighbors=5)
+
+        for (x,y,w,h) in faces:
+            roi = image_array[y:y+h,x:x+w]
+            x_train.append(roi)
+            y_labels.append(id_)
+with open("label pickle","wb")as f:
+    pickle.dump(label_ids,f)
+
+recognizer.train(x_train,np.array(y_labels))
+recognizer.save("mytrainer.xml")
+
+import cv2
+import numpy
+import pickle
+
+face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarscade_frontalface_alt2.xml')
+recognizer = cv2.face.LBPHFaceRecognizer_create()
+recognizer.read("./mytrainer.xml")
+
+labels = {}
+
+with open("label.pickle","rb")as f:
+    origin_labels = pickle.load(f)
+    labels = {v:k for k,v in origiin_labels.items()}
+
+cap = cv2.VideoCapture(0)
+
+while True:
+    ret,frame = cap.read()
+    if ret:
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        faces = face_cascade.detectMultiScale(gray,scaleFactor=1.3,minNeighbors = 5)
+        for (x,y,w,h) in faces:
+            gray_roi = gray[y:y+h,x:x+w]
+            id_,conf = recognizer.predict(gray_roi)
+            if conf >= 60:
+                cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                cv2.putText(frame,str(labels[id_]),(x,y-15),cv2.FONT_HERSHEY_SIMPLEX,2,(255,0,0),2)
+
+            cv2.imshow("Result",frame)
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+cap.release()
+cv2.destroyAllWindows()
