@@ -1,0 +1,91 @@
+from gpiozero import Button
+from signal import pause
+
+def button_pressed():
+    print("按钮按下！")
+
+btn = Button(10, bounce_time=0.1)
+btn.when_pressed = button_pressed
+
+print("按下按钮测试...")
+pause()
+
+
+
+
+from gpiozero import Button, Servo
+from time import sleep
+from signal import pause
+
+# 1. 初始化硬件
+# 注意：GPIO编号是BCM模式
+trigger_btn = Button(10, bounce_time=0.1)  # 添加消抖时间
+pass_buttons = [
+    Button(2, bounce_time=0.1),
+    Button(3, bounce_time=0.1),
+    Button(4, bounce_time=0.1),
+    Button(5, bounce_time=0.1),
+    Button(6, bounce_time=0.1),
+    Button(7, bounce_time=0.1),
+    Button(8, bounce_time=0.1),
+    Button(9, bounce_time=0.1)
+]
+servo = Servo(12)
+
+# 2. 预设密码
+PASSWORD = [0, 2, 4]
+input_pass = []
+is_input_mode = False  # 新增标志位，表示是否在输入密码模式
+
+# 3. 密码按键按下时的回调函数
+def record_password(button):
+    if not is_input_mode:
+        return  # 不在输入模式时忽略按键
+    
+    index = pass_buttons.index(button)
+    input_pass.append(index)
+    print(f"按下按键 {index + 1}（索引 {index}）")
+    
+    # 如果已经输入了足够长度的密码，立即验证
+    if len(input_pass) >= len(PASSWORD):
+        verify_password()
+
+# 4. 验证密码函数
+def verify_password():
+    global input_pass, is_input_mode
+    
+    print("正在验证密码...")
+    if input_pass == PASSWORD:
+        print("密码正确！开门～")
+        servo.max()   # 开门
+        sleep(2)
+        servo.mid()   # 关门
+    else:
+        print("密码错误！")
+    
+    # 重置状态
+    input_pass = []
+    is_input_mode = False
+    print("请再次按下触发按钮开始输入密码")
+
+# 5. 触发按钮按下时的逻辑
+def start_password_input():
+    global input_pass, is_input_mode
+    
+    print("触发按钮按下！开始输入密码")
+    input_pass = []  # 清空上次输入
+    is_input_mode = True
+    print(f"请输入 {len(PASSWORD)} 位密码")
+
+# 6. 绑定事件
+trigger_btn.when_pressed = start_password_input
+for btn in pass_buttons:
+    btn.when_pressed = record_password
+
+# 7. 保持程序运行
+print("等待触发按钮按下...（按 Ctrl+C 退出）")
+try:
+    pause()  # 使用pause()代替手动循环
+except KeyboardInterrupt:
+    servo.close()
+    print("程序退出")
