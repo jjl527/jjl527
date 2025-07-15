@@ -1,0 +1,21 @@
+import RPi.GPIO as GPIO
+from time import sleep
+
+# 设置GPIO模式为BCM
+GPIO.setmode(GPIO.BCM)
+
+# 定义电位器连接的GPIO引脚，假设连接到BCM18
+potentiometer_pin = 18
+
+# 将引脚设置为输入模式
+GPIO.setup(potentiometer_pin, GPIO.IN)
+
+try:
+    while True:
+        # 读取电位器的值
+        value = GPIO.input(potentiometer_pin)
+        # 这里可以根据需要对读取的值进行处理，例如打印
+        print(value)
+        sleep(0.1)
+except KeyboardInterrupt:
+    GPIO.cleanup()
