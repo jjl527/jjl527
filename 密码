@@ -1,0 +1,55 @@
+from gpiozero import Button, Servo
+from time import sleep
+
+# 1. 初始化硬件
+# 触发按钮（按一下开始输密码）
+trigger_btn = Button(10)  
+# 8 个密码按键（按顺序代表密码位）
+pass_buttons = [Button(2), Button(3), Button(4), Button(5), 
+                Button(6), Button(7), Button(8), Button(9)]  
+# 舵机（控制门锁）
+servo = Servo(12)  
+
+# 2. 预设密码（示例：按顺序按第 1、3、5 个按键，对应索引 0、2、4）
+PASSWORD = [0, 2, 4]  
+input_pass = []  # 存用户输入的密码
+
+# 3. 密码按键按下时的回调函数
+def record_password(button):
+    index = pass_buttons.index(button)  # 获取按下的是第几个密码按键
+    input_pass.append(index)
+    print(f"按下按键 {index + 1}（索引 {index}）")
+
+# 4. 给 8 个密码按键绑定事件
+for btn in pass_buttons:
+    btn.when_pressed = record_password
+
+# 5. 触发按钮按下时的逻辑
+def start_password_input():
+    global input_pass
+    print("触发按钮按下！开始输入密码（按 8 个按键中的 3 个，顺序对应预设密码）")
+    input_pass = []  # 清空上次输入
+    sleep(0.5)       # 消抖
+    # 等待用户输入 3 位密码（和 PASSWORD 长度一致）
+    while len(input_pass) < len(PASSWORD):
+        sleep(0.1)
+    # 验证密码
+    if input_pass == PASSWORD:
+        print("密码正确！开门～")
+        servo.max()   # 舵机转动（模拟开门）
+        sleep(2)      # 保持开门状态
+        servo.mid()   # 舵机复位（关门）
+    else:
+        print("密码错误！重新触发按钮再试～")
+
+# 6. 给触发按钮绑定事件
+trigger_btn.when_pressed = start_password_input
+
+# 7. 保持程序运行，等待按键
+print("等待触发按钮按下...（按 Ctrl+C 退出）")
+try:
+    while True:
+        sleep(0.1)
+except KeyboardInterrupt:
+    servo.close()
+    print("程序退出")
