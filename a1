@@ -1,0 +1,46 @@
+from gpiozero import Button, Servo
+from time import sleep
+
+# 定义按键
+enter_buttons = [Button(10), Button(11)]  # 2个进入密码按键
+pass_buttons = [Button(2), Button(3), Button(4), Button(5), 
+                Button(6), Button(7), Button(8), Button(9)]  # 8个密码按键
+servo = Servo(12)  # 舵机接 GPIO12
+
+# 预设密码（示例，可自定义，比如按顺序按第1、3、5个按键，这里用索引 0、2、4 模拟）
+PASSWORD = [0, 2, 4]  
+input_pass = []
+
+def check_enter():
+    """检测是否同时按下2个进入按键"""
+    return enter_buttons[0].is_pressed and enter_buttons[1].is_pressed
+
+def record_pass(button):
+    """记录密码按键按下顺序"""
+    index = pass_buttons.index(button)
+    input_pass.append(index)
+    print(f"按下按键 {index + 1}")
+
+# 给8个密码按键绑定事件
+for btn in pass_buttons:
+    btn.when_pressed = lambda b=btn: record_pass(b)
+
+try:
+    while True:
+        if check_enter():
+            print("进入密码输入环节")
+            sleep(0.5)  # 消抖
+            while len(input_pass) < len(PASSWORD):
+                sleep(0.1)  # 等待输入
+            # 验证密码
+            if input_pass == PASSWORD:
+                print("密码正确，开门！")
+                servo.max()  # 舵机转动（根据实际调整角度，max/min/mid 或指定角度）
+                sleep(2)
+                servo.mid()  # 复位
+            else:
+                print("密码错误！")
+            input_pass = []  # 清空，准备下一次
+        sleep(0.1)
+except KeyboardInterrupt:
+    servo.close()
