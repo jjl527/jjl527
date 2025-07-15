@@ -1,0 +1,31 @@
+home/creative/venv/lib/python3.10/site-packages/gpiozero/devices.py:300: PinFactoryFallback: Falling back from lgpio: No module named 'lgpio'
+  warnings.warn(
+Traceback (most recent call last):
+  File "/home/creative/venv/lib/python3.10/site-packages/gpiozero/pins/pi.py", line 411, in pin
+    pin = self.pins[info]
+KeyError: PinInfo(number=19, name='GPIO10', names=frozenset({'J8:19', 'WPI12', '10', 'BOARD19', 10, 'GPIO10', 'BCM10'}), pull='', row=10, col=1, interfaces=frozenset({'gpio', '', 'spi', 'i2c', 'dpi', 'uart'}))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/creative/venv/a1.py", line 6, in <module>
+    trigger_btn = Button(10)  
+  File "/home/creative/venv/lib/python3.10/site-packages/gpiozero/devices.py", line 108, in __call__
+    self = super().__call__(*args, **kwargs)
+  File "/home/creative/venv/lib/python3.10/site-packages/gpiozero/input_devices.py", line 412, in __init__
+    super().__init__(
+  File "/home/creative/venv/lib/python3.10/site-packages/gpiozero/mixins.py", line 417, in __init__
+    super().__init__(*args, **kwargs)
+  File "/home/creative/venv/lib/python3.10/site-packages/gpiozero/input_devices.py", line 162, in __init__
+    super().__init__(
+  File "/home/creative/venv/lib/python3.10/site-packages/gpiozero/mixins.py", line 243, in __init__
+    super().__init__(*args, **kwargs)
+  File "/home/creative/venv/lib/python3.10/site-packages/gpiozero/input_devices.py", line 79, in __init__
+    super().__init__(pin, pin_factory=pin_factory)
+  File "/home/creative/venv/lib/python3.10/site-packages/gpiozero/devices.py", line 553, in __init__
+    pin = self.pin_factory.pin(pin)
+  File "/home/creative/venv/lib/python3.10/site-packages/gpiozero/pins/pi.py", line 413, in pin
+    pin = self.pin_class(self, info)
+  File "/home/creative/venv/lib/python3.10/site-packages/gpiozero/pins/rpigpio.py", line 101, in __init__
+    GPIO.setup(self._number, GPIO.IN, self.GPIO_PULL_UPS[self._pull])
+RuntimeError: Cannot determine SOC peripheral base address
