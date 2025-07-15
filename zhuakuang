@@ -1,0 +1,9 @@
+# 将用户加入gpio组（如果尚未加入）
+sudo usermod -a -G gpio $USER
+# 然后注销并重新登录
+
+
+
+
+# 正确命令（注意 -G 和 gpio）：
+sudo usermod -a -G gpio $USER
